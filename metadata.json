@@ -1,0 +1,7 @@
+{
+  "name": "Besaha - Authentic Morocco",
+  "description": "Discover authentic Moroccan cuisine, chat with travelers, and leave verified geolocated reviews.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
