@@ -1,20 +1,18 @@
-import { GoogleGenerativeAI } from "@google/genai";
+import { GoogleGenAI } from "@google/genai"; // ✅ correct import for browser
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY; // ✅ Vite env variable syntax
 
 if (!apiKey) {
-  throw new Error("VITE_GEMINI_API_KEY is missing");
+  throw new Error("VITE_GEMINI_API_KEY is missing"); // ✅ good runtime check
 }
 
-const genAI = new GoogleGenerativeAI(apiKey);
+const client = new GoogleGenAI({ apiKey }); // ✅ correct instantiation
 
 export async function askConcierge(
-  prompt: string,
-  restaurantContext?: string
-): Promise<string> {
+  prompt: string, // ✅ TypeScript type for input
+  restaurantContext?: string // ✅ optional string
+): Promise<string> { // ✅ TypeScript return type
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
     const fullPrompt = `
 You are a knowledgeable Moroccan Concierge named "Hakim" for the app "Besaha".
 Your tone is warm, welcoming, and culturally respectful.
@@ -24,12 +22,17 @@ Restaurant Context: ${restaurantContext || "General inquiry"}
 User Question: ${prompt}
 
 Answer briefly (under 100 words) and helpfully.
-`;
+`; // ✅ template string, correct syntax
 
-    const result = await model.generateContent(fullPrompt);
-    return result.response.text();
+    const response = await client.models.generateContent({
+      model: "gemini-2.5-flash", // ✅ string literal
+      contents: fullPrompt,       // ✅ string
+    });
+
+    return response.text || "I'm sorry, I couldn't find an answer to that."; // ✅ safe fallback
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    return "I am having trouble connecting to the spirits of the internet. Please try again.";
+    console.error("Gemini API Error:", error); // ✅ logs error
+    return "I am having trouble connecting to the spirits of the internet. Please try again."; // ✅ safe fallback
   }
-};
+}
+
