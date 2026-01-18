@@ -1,38 +1,37 @@
-import { GoogleGenAI } from "@google/genai"; // ✅ correct import for browser
+import { GoogleGenAI } from "@google/genai";
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY; // ✅ Vite env variable syntax
+const getClient = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) return null;
+  return new GoogleGenAI({ apiKey });
+};
 
-if (!apiKey) {
-  throw new Error("VITE_GEMINI_API_KEY is missing"); // ✅ good runtime check
-}
+export const askConcierge = async (prompt: string, restaurantContext?: string): Promise<string> => {
+  const ai = getClient();
+  if (!ai) {
+    return "AI Concierge is currently offline (API Key missing). Please try again later.";
+  }
 
-const client = new GoogleGenAI({ apiKey }); // ✅ correct instantiation
-
-export async function askConcierge(
-  prompt: string, // ✅ TypeScript type for input
-  restaurantContext?: string // ✅ optional string
-): Promise<string> { // ✅ TypeScript return type
   try {
     const fullPrompt = `
-You are a knowledgeable Moroccan Concierge named "Hakim" for the app "Besaha".
-Your tone is warm, welcoming, and culturally respectful.
-Context: The user is asking about Moroccan food or culture.
-Restaurant Context: ${restaurantContext || "General inquiry"}
+      You are a knowledgeable Moroccan Concierge named "Hakim" for the app "Besaha".
+      Your tone is warm, welcoming, and culturally respectful.
+      Context: The user is asking about Moroccan food or culture.
+      Restaurant Context: ${restaurantContext || 'General inquiry'}
 
-User Question: ${prompt}
+      User Question: ${prompt}
 
-Answer briefly (under 100 words) and helpfully.
-`; // ✅ template string, correct syntax
+      Answer briefly (under 100 words) and helpfuly.
+    `;
 
-    const response = await client.models.generateContent({
-      model: "gemini-2.5-flash", // ✅ string literal
-      contents: fullPrompt,       // ✅ string
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: fullPrompt,
     });
 
-    return response.text || "I'm sorry, I couldn't find an answer to that."; // ✅ safe fallback
+    return response.text || "I'm sorry, I couldn't find an answer to that.";
   } catch (error) {
-    console.error("Gemini API Error:", error); // ✅ logs error
-    return "I am having trouble connecting to the spirits of the internet. Please try again."; // ✅ safe fallback
+    console.error("Gemini API Error:", error);
+    return "I am having trouble connecting to the spirits of the internet. Please try again.";
   }
-}
-
+};
